@@ -33,6 +33,22 @@ modules:
     requires:
       - name: irregular-verbs-app-db
 
+  - name: irregular-verbs-app
+    type: approuter.nodejs
+    path: app/ # from cds.env.folders. Consider also cds.env.build.target -> gen/app
+    parameters:
+      keep-existing-routes: true
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api # must be used in xs-app.json as well
+          url: ~{srv-url}
+          forwardAuthToken: true
+      - name: irregular-verbs-app-auth
+
 resources:
   - name: irregular-verbs-app-auth
     type: org.cloudfoundry.managed-service
