@@ -1,25 +1,21 @@
-# Getting Started
+# Irregular Verbs (CF Application)
 
-Welcome to your new project.
+## Deploy to Cloud Foundry
+```powershell
+# build project
+cds build --production
 
-It contains these folders and files, following our recommended project layout:
+# build mta
+mbt build -t gen --mtar mta.tar
 
-File or Folder | Purpose
----------|----------
-`app/` | content for UI frontends goes here
-`db/` | your domain models and data go here
-`srv/` | your service models and code go here
-`package.json` | project metadata and configuration
-`readme.md` | this getting started guide
+# login CF
+cf api <cf_url>
+cf login
 
+# deploy to CF
+cf deploy gen/mta.tar
+```
 
-## Next Steps
+## Application Router
 
-- Open a new terminal and run `cds watch` 
-- (in VS Code simply choose _**Terminal** > Run Task > cds watch_)
-- Start adding content, for example, a [db/schema.cds](db/schema.cds).
-
-
-## Learn More
-
-Learn more at https://cap.cloud.sap/docs/get-started/.
+[Irregular Verbs Application](https://f6189f41trial-dev-irregular-verbs-app.cfapps.us10-001.hana.ondemand.com/index.html)
