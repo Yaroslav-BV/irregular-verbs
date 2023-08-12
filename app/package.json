@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node node_modules/@sap/approuter/approuter.js",
     "build": "cd irregular.verbs.ui && npm run build",
-    "irregular-verbs-ui:install": "cd irregular.verbs.ui && npm install"
+    "irregular-verbs-ui:install": "cd irregular.verbs.ui && npm install",
+    "irregular.verbs.ui:dev": "cd irregular.verbs.ui && npm start"
   }
 }
