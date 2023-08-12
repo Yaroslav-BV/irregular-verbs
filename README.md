@@ -2,9 +2,6 @@
 
 ## Deploy to Cloud Foundry
 ```powershell
-# build project
-cds build --production
-
 # build mta
 mbt build -t gen --mtar mta.tar
 

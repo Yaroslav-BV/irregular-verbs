@@ -1,4 +1,4 @@
-_schema-version: '3.1'
+_schema-version: "3.1"
 ID: irregular-verbs-app
 version: 1.0.0
 description: "A simple CAP project."
@@ -8,7 +8,9 @@ build-parameters:
   before-all:
     - builder: custom
       commands:
-        - npx cds build --production
+        - npm install
+        - cds build --production
+        - npm prune --production
 modules:
   - name: irregular-verbs-app-srv
     type: nodejs
@@ -40,6 +42,14 @@ modules:
       keep-existing-routes: true
       disk-quota: 256M
       memory: 256M
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - npm run irregular-verbs-ui:install
+        - npm run build
+        - npm prune --production
+      ignore: ["irregular.verbs.ui/", "default-env.json"]
     requires:
       - name: srv-api
         group: destinations
@@ -55,7 +65,7 @@ resources:
     parameters:
       service: xsuaa
       service-plan: application
-      path: ./xs-security.json
+      path: security/xs-security.json
       config:
         xsappname: irregular-verbs-app-${org}-${space}
         tenant-mode: dedicated

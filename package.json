@@ -17,7 +17,9 @@
     "@sap/cds-dk": "^7"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-serve",
+    "app:start": "cd app && npm start",
+    "app:build": "cd app && npm run build"
   },
   "cds": {
     "requires": {

@@ -9,6 +9,9 @@ gen/
 node_modules/
 target/
 
+# App
+app/resources
+
 # Web IDE, App Studio
 .che/
 .gen/
