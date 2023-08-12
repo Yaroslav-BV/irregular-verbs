@@ -7,6 +7,8 @@
     "node": "^18.0.0"
   },
   "scripts": {
-    "start": "node node_modules/@sap/approuter/approuter.js"
+    "start": "node node_modules/@sap/approuter/approuter.js",
+    "build": "cd irregular.verbs.ui && npm run build",
+    "irregular-verbs-ui:install": "cd irregular.verbs.ui && npm install"
   }
 }

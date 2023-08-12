@@ -1,4 +1,15 @@
 {
-  "welcomeFile": "index.html",
-  "routes": []
+  "welcomeFile": "index-cdn.html",
+  "routes": [
+    {
+      "source": "^/user-api(.*)",
+      "target": "$1",
+      "service": "sap-approuter-userapi"
+    },
+    {
+      "source": "/(.*)",
+      "localDir": "resources",
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    }
+  ]
 }

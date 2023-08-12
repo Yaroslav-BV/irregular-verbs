@@ -1,0 +1,17 @@
+{
+  "generator-ui5-ts-app": {
+    "namespace": "irregular.verbs.ui",
+    "framework": "OpenUI5",
+    "frameworkVersion": "1.117.0",
+    "author": "Yaroslav-BV",
+    "initrepo": false,
+    "tstypes": "@openui5/types",
+    "tstypesVersion": "1.117.0",
+    "appId": "irregular.verbs.ui",
+    "appURI": "irregular/verbs/ui",
+    "cdnDomain": "sdk.openui5.org",
+    "defaultTheme": "sap_horizon",
+    "gte11150": true,
+    "setupCompleted": true
+  }
+}
