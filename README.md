@@ -15,4 +15,4 @@ cf deploy gen/mta.tar
 
 ## Application Router
 
-[Irregular Verbs Application](https://f6189f41trial-dev-irregular-verbs-app.cfapps.us10-001.hana.ondemand.com/index.html)
+[Irregular Verbs Application](https://f6189f41trial-dev-irregular-verbs-app.cfapps.us10-001.hana.ondemand.com)
