@@ -19,3 +19,8 @@ server:
       afterMiddleware: compression
     - name: ui5-middleware-livereload
       afterMiddleware: compression
+    - name: ui5-middleware-simpleproxy
+      mountPath: /odata/v4
+      afterMiddleware: compression
+      configuration:
+        baseUri: http://localhost:4004/odata/v4
