@@ -9,6 +9,15 @@
 		"description": "{{appDescription}}",
 		"applicationVersion": {
 			"version": "1.0.0"
+		},
+		"dataSources": {
+			"default": {
+				"uri": "/odata/v4/dictionary/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "4.0"
+				}
+			}
 		}
 	},
 
@@ -46,6 +55,12 @@
 		},
 
 		"models": {
+			"": {
+				"dataSource": "default",
+				"settings": {
+					"updateGroupId": "myAppUpdateGroup"
+				}
+			},
 			"i18n": {
 				"type": "sap.ui.model.resource.ResourceModel",
 				"settings": {
@@ -66,14 +81,14 @@
 			"routes": [
 				{
 					"pattern": "",
-					"name": "main",
-					"target": "main"
+					"name": "dictionary",
+					"target": "dictionary"
 				}
 			],
 			"targets": {
-				"main": {
-					"viewId": "main",
-					"viewName": "Main"
+				"dictionary": {
+					"viewId": "dictionary",
+					"viewName": "Dictionary"
 				}
 			}
 		}

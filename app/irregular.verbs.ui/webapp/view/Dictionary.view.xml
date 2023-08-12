@@ -1,0 +1,43 @@
+<mvc:View
+	controllerName="irregular.verbs.ui.controller.Dictionary"
+	displayBlock="true"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core"
+	core:require="{
+		formatter: 'irregular/verbs/ui/model/formatter'
+	}">
+		<Table
+			id="idDictionary"
+			items="{
+				path: '/Dictionary',
+				parameters: {
+					$count : true
+				}
+			}">
+		<columns>
+			<Column>
+				<Text text="Base" />
+			</Column>
+			<Column>
+				<Text text="Past" />
+			</Column>
+			<Column>
+				<Text text="Participle" />
+			</Column>
+			<Column>
+				<Text text="Translation" />
+			</Column>
+		</columns>
+		<items>
+			<ColumnListItem>
+				<cells>
+					<Text text="{base}" />
+					<Text text="{past}" />
+					<Text text="{participle}" />
+					<Text text="{translation}" />
+				</cells>
+			</ColumnListItem>
+		</items>
+	</Table>
+</mvc:View>
