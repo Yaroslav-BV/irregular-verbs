@@ -11,7 +11,7 @@
 			"version": "1.0.0"
 		},
 		"dataSources": {
-			"default": {
+			"dictionaryService": {
 				"uri": "/odata/v4/dictionary/",
 				"type": "OData",
 				"settings": {
@@ -55,11 +55,8 @@
 		},
 
 		"models": {
-			"": {
-				"dataSource": "default",
-				"settings": {
-					"updateGroupId": "myAppUpdateGroup"
-				}
+			"dictionary": {
+				"dataSource": "dictionaryService"
 			},
 			"i18n": {
 				"type": "sap.ui.model.resource.ResourceModel",
