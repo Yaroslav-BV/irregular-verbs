@@ -15,5 +15,8 @@
 		"project": ["./app/irregular.verbs.ui/tsconfig.json"],
 		"sourceType": "module"
 	},
-	"plugins": ["@typescript-eslint"]
+	"plugins": ["@typescript-eslint"],
+	"rules": {
+		"@typescript-eslint/unbound-method": "off"
+	}
 }

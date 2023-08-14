@@ -1,13 +1,17 @@
 import BaseController from "./BaseController";
+import Event from "sap/ui/base/Event";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import ODataListBinding from "sap/ui/model/odata/v4/ODataListBinding";
+import ODataModel from "sap/ui/model/odata/v4/ODataModel";
 import ResourceModel from "sap/ui/model/resource/ResourceModel";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
+import ListBinding from "sap/ui/model/ListBinding";
+import ODataListBinding from "sap/ui/model/odata/v4/ODataListBinding";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import FilterType from "sap/ui/model/FilterType";
 import MessageBox from "sap/m/MessageBox";
 import MessageToast from "sap/m/MessageToast";
+import Message from "sap/ui/core/message/Message";
 import SearchField from "sap/m/SearchField";
 import { IDictionaryStore } from "../interfaces/dictionary.interfaces";
 import { DICTIONARY_STORE_NAME } from "../constants/dictionary.constant";
@@ -16,8 +20,62 @@ import { DICTIONARY_STORE_NAME } from "../constants/dictionary.constant";
  * @namespace irregular.verbs.ui.controller
  */
 export default class Dictionary extends BaseController {
+	private technicalErrors = false;
+
 	onInit(): void {
 		this.initDictionaryStore();
+		this.initMessages();
+	}
+
+	initMessages(): void {
+		const messageManager = sap.ui.getCore().getMessageManager();
+		const messageModel = messageManager.getMessageModel();
+		const messageModelBinding = messageModel.bindList(
+			"/",
+			undefined,
+			[],
+			new Filter("technical", FilterOperator.EQ, true)
+		);
+
+		this.setModel(messageModel, "message");
+
+		messageModelBinding.attachChange(this.onMessageBindingChange, this);
+	}
+
+	onMessageBindingChange(event: Event): void {
+		const contexts = event.getSource<ListBinding>().getContexts();
+		let isMessageOpen = false;
+
+		if (isMessageOpen || !contexts.length) return;
+
+		const messages: Message[] = contexts.map<Message>(
+			(context) => context.getObject() as Message
+		);
+		sap.ui.getCore().getMessageManager().removeMessages(messages);
+
+		this.setUIChanges(true);
+		this.technicalErrors = true;
+		MessageBox.error(messages[0].getMessage(), {
+			id: "serviceErrorMessageBox",
+			onClose(): void {
+				isMessageOpen = false;
+			},
+		});
+
+		isMessageOpen = true;
+	}
+
+	private setUIChanges(hasUIChanges: boolean): void {
+		if (this.technicalErrors) {
+			hasUIChanges = true;
+		} else if (hasUIChanges === undefined) {
+			hasUIChanges = (
+				this.getView().getModel("dictionary") as ODataModel
+			).hasPendingChanges();
+		}
+
+		const model = this.getView().getModel(DICTIONARY_STORE_NAME) as JSONModel;
+		model.setProperty("/hasUIChanges", hasUIChanges);
 	}
 
 	/**
@@ -27,6 +85,7 @@ export default class Dictionary extends BaseController {
 		const initDictionaryStore: IDictionaryStore = {
 			busy: false,
 			editable: false,
+			hasUIChanges: false,
 		};
 
 		const dictionaryStore = new JSONModel(initDictionaryStore);
