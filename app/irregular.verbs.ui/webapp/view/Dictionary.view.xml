@@ -29,6 +29,20 @@
                                     <content>
                                         <ToolbarSpacer />
                                         <Button
+                                            id="editButton"
+                                            icon="sap-icon://edit"
+                                            tooltip="{i18n>editTooltip}"
+                                            press=".onEdit"
+                                            visible="{= !${dictionaryStore>/editable}}"
+                                        />
+                                        <Button
+                                            id="cancelButton"
+                                            icon="sap-icon://sys-cancel"
+                                            tooltip="{i18n>cancelTooltip}"
+                                            press=".onCancel"
+                                            visible="{= ${dictionaryStore>/editable}}"
+                                        />
+                                        <Button
                                             id="refreshButton"
                                             icon="sap-icon://refresh"
                                             tooltip="{i18n>refreshTooltip}"
@@ -53,10 +67,47 @@
                             </columns>
                             <items>
                                 <ColumnListItem>
-                                    <Input value="{dictionary>base}" />
-                                    <Input value="{dictionary>past}" />
-                                    <Input value="{dictionary>participle}" />
-                                    <Input value="{dictionary>translation}" />
+                                    <HBox alignItems="Center">
+                                        <Text
+                                            text="{dictionary>base}"
+                                            visible="{= !${dictionaryStore>/editable}}"
+                                        />
+                                        <Input
+                                            value="{dictionary>base}"
+                                            visible="{= ${dictionaryStore>/editable}}"
+                                        />
+                                    </HBox>
+                                    <HBox alignItems="Center">
+                                        <Text
+                                            text="{dictionary>past}"
+                                            visible="{= !${dictionaryStore>/editable}}"
+                                        />
+                                        <Input
+                                            value="{dictionary>past}"
+                                            visible="{= ${dictionaryStore>/editable}}"
+                                        />
+                                    </HBox>
+                                    <HBox alignItems="Center">
+                                        <Text
+                                            text="{dictionary>participle}"
+                                            visible="{= !${dictionaryStore>/editable}}"
+                                        />
+                                        <Input
+                                            value="{dictionary>participle}"
+                                            visible="{= ${dictionaryStore>/editable}}"
+                                        />
+                                    </HBox>
+
+                                    <HBox alignItems="Center">
+                                        <Text
+                                            text="{dictionary>translation}"
+                                            visible="{= !${dictionaryStore>/editable}}"
+                                        />
+                                        <Input
+                                            value="{dictionary>translation}"
+                                            visible="{= ${dictionaryStore>/editable}}"
+                                        />
+                                    </HBox>
                                 </ColumnListItem>
                             </items>
                         </Table>

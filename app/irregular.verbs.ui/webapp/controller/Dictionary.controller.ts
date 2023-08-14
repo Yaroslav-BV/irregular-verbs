@@ -22,11 +22,26 @@ export default class Dictionary extends BaseController {
 	private initDictionaryStore(): void {
 		const initDictionaryStore: IDictionaryStore = {
 			busy: false,
+			editable: false,
 		};
 
 		const dictionaryStore = new JSONModel(initDictionaryStore);
 
 		this.setModel(dictionaryStore, DICTIONARY_STORE_NAME);
+	}
+
+	onEdit(): void {
+		(this.getModel(DICTIONARY_STORE_NAME) as JSONModel).setProperty(
+			"/editable",
+			true
+		);
+	}
+
+	onCancel(): void {
+		(this.getModel(DICTIONARY_STORE_NAME) as JSONModel).setProperty(
+			"/editable",
+			false
+		);
 	}
 
 	onRefresh(): void {
