@@ -4,144 +4,65 @@
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
-    xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
     core:require="{
 		formatter: 'irregular/verbs/ui/model/formatter'
 	}"
 >
-    <Page
-        title="{i18n>appTitle}"
-        titleAlignment="Center"
-        enableScrolling="true"
-        class="sapUiContentPadding"
-        showNavButton="false"
-    >
-        <content>
-            <Table
-                id="idDictionary"
-                growing="true"
-                growingThreshold="20"
-                items="{
-                    path: 'dictionary>/Dictionary',
-                    parameters: {
-                        $count : true
-                    }
-                }"
-            >
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Label
-                            text="Languages"
-                            labelFor="select-voice"
-                        />
-                        <Select
-                            id="select-voice"
+    <Shell>
+        <App
+            busy="{dictionaryStore>/busy}"
+            class="sapUiSizeCompact"
+        >
+            <pages>
+                <Page title="{i18n>appTitle}">
+                    <content>
+                        <Table
+                            id="dictionaryList"
+                            growing="true"
+                            growingThreshold="10"
                             items="{
-						        path: 'dictionaryStoreModel>/voices'
-					        }"
-                            selectedKey="{dictionaryStoreModel>/selectedVoice}"
+								path: 'dictionary>/Dictionary'
+							}"
                         >
-                            <core:Item
-                                key="{dictionaryStoreModel>name}"
-                                text="{dictionaryStoreModel>name}"
-                            />
-                        </Select>
-                        <Label
-                            text="Speed"
-                            labelFor="slider-speed"
-                        />
-                        <Slider
-                            id="slider-speed"
-                            width="10%"
-                            min="0.1"
-                            max="1.5"
-                            step="0.1"
-                            value="{dictionaryStoreModel>/speed}"
-                            showAdvancedTooltip="true"
-                        />
-                        <Text text="{dictionaryStoreModel>/speed}" />
-                        <Label
-                            text="Pitch"
-                            labelFor="slider-pitch"
-                        />
-                        <Slider
-                            id="slider-pitch"
-                            width="10%"
-                            min="0.1"
-                            max="2"
-                            step="0.1"
-                            value="{dictionaryStoreModel>/pitch}"
-                            showAdvancedTooltip="true"
-                        />
-                        <Text text="{dictionaryStoreModel>/pitch}" />
-                    </OverflowToolbar>
-                </headerToolbar>
-                <columns>
-                    <Column>
-                        <Text text="Base" />
-                    </Column>
-                    <Column>
-                        <Text text="Past" />
-                    </Column>
-                    <Column>
-                        <Text text="Participle" />
-                    </Column>
-                    <Column>
-                        <Text text="Translation" />
-                    </Column>
-                    <Column>
-                        <Text text="Play all" />
-                    </Column>
-                </columns>
-                <items>
-                    <ColumnListItem>
-                        <cells>
-                            <HBox alignItems="Center">
-                                <Button
-                                    icon="sap-icon://sound-loud"
-                                    app:word="{dictionary>base}"
-                                    type="Transparent"
-                                    press="onSayWord"
-                                    tooltip="Say word"
-                                    class="sapUiSmallMarginEnd"
-                                />
-                                <Text text="{dictionary>base}" />
-                            </HBox>
-                            <HBox alignItems="Center">
-                                <Button
-                                    icon="sap-icon://sound-loud"
-                                    app:word="{dictionary>past}"
-                                    type="Transparent"
-                                    press="onSayWord"
-                                    tooltip="Say word"
-                                    class="sapUiSmallMarginEnd"
-                                />
-                                <Text text="{dictionary>past}" />
-                            </HBox>
-                            <HBox alignItems="Center">
-                                <Button
-                                    icon="sap-icon://sound-loud"
-                                    app:word="{dictionary>participle}"
-                                    type="Transparent"
-                                    press="onSayWord"
-                                    tooltip="Say word"
-                                    class="sapUiSmallMarginEnd"
-                                />
-                                <Text text="{dictionary>participle}" />
-                            </HBox>
-                            <Text text="{dictionary>translation}" />
-                            <Button
-                                icon="sap-icon://sound-loud"
-                                app:word="{dictionary>ID}"
-                                type="Transparent"
-                                press="onSayAllPhrase"
-                                tooltip="Say all phrase"
-                                class="sapUiSmallMarginEnd"
-                            />
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
-        </content>
-    </Page>
+                            <headerToolbar>
+                                <OverflowToolbar>
+                                    <content>
+                                        <ToolbarSpacer />
+                                        <Button
+                                            id="refreshButton"
+                                            icon="sap-icon://refresh"
+                                            tooltip="{i18n>refreshTooltip}"
+                                            press=".onRefresh"
+                                        />
+                                    </content>
+                                </OverflowToolbar>
+                            </headerToolbar>
+                            <columns>
+                                <Column>
+                                    <Text text="Base" />
+                                </Column>
+                                <Column>
+                                    <Text text="Past" />
+                                </Column>
+                                <Column>
+                                    <Text text="Participle" />
+                                </Column>
+                                <Column>
+                                    <Text text="Translation" />
+                                </Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <Input value="{dictionary>base}" />
+                                    <Input value="{dictionary>past}" />
+                                    <Input value="{dictionary>participle}" />
+                                    <Input value="{dictionary>translation}" />
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </content>
+                </Page>
+            </pages>
+        </App>
+    </Shell>
 </mvc:View>

@@ -1,135 +1,55 @@
-import { CustomModel } from "sap/ui/model/Model";
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import { Button$ClickEvent } from "sap/ui/webc/main/Button";
-import { CustomContextBinding } from "sap/ui/model/ContextBinding";
-
-interface IDictionaryStore {
-	voices: SpeechSynthesisVoice[];
-	selectedVoice: string;
-	speed: number;
-	pitch: number;
-}
-
-interface DictionaryRow {
-	ID: string;
-	base: string;
-	past: string;
-	participle: string;
-	translation: string;
-}
-
-enum SpeechLang {
-	EN = "en",
-	DE = "de",
-}
+import MessageBox from "sap/m/MessageBox";
+import MessageToast from "sap/m/MessageToast";
+import ODataListBinding from "sap/ui/model/odata/v4/ODataListBinding";
+import ResourceModel from "sap/ui/model/resource/ResourceModel";
+import ResourceBundle from "sap/base/i18n/ResourceBundle";
+import { IDictionaryStore } from "../interfaces/dictionary.interfaces";
+import { DICTIONARY_STORE_NAME } from "../constants/dictionary.constant";
 
 /**
  * @namespace irregular.verbs.ui.controller
  */
 export default class Dictionary extends BaseController {
-	private readonly storeName = "dictionaryStoreModel";
+	onInit(): void {
+		this.initDictionaryStore();
+	}
 
-	async onInit(): Promise<void> {
-		const voices = await this.loadSpeechVoices(SpeechLang.EN);
-
-		const dictionaryStore: IDictionaryStore = {
-			voices,
-			selectedVoice: voices[0].name,
-			speed: 1,
-			pitch: 1,
+	/**
+	 * Initialization dictionary store
+	 */
+	private initDictionaryStore(): void {
+		const initDictionaryStore: IDictionaryStore = {
+			busy: false,
 		};
 
-		const dictionaryStoreModel = new JSONModel(dictionaryStore);
-		this.getView().setModel(dictionaryStoreModel, this.storeName);
+		const dictionaryStore = new JSONModel(initDictionaryStore);
+
+		this.setModel(dictionaryStore, DICTIONARY_STORE_NAME);
 	}
 
-	/**
-	 * Load native voices
-	 * @param {SpeechLang} speechLang Language
-	 * @returns {Promise<SpeechSynthesisVoice[]>}
-	 */
-	async loadSpeechVoices(
-		speechLang: SpeechLang
-	): Promise<SpeechSynthesisVoice[]> {
-		return new Promise((resolve, reject) => {
-			const synth: SpeechSynthesis = window.speechSynthesis;
+	onRefresh(): void {
+		const binding = this.byId("dictionaryList").getBinding(
+			"items"
+		) as ODataListBinding;
 
-			const intervalId = setInterval(() => {
-				const voices = synth.getVoices();
+		if (binding.hasPendingChanges()) {
+			MessageBox.error(this.getText("refreshNotPossibleMessage"));
+			return;
+		}
 
-				if (voices.length) {
-					clearInterval(intervalId);
+		binding.refresh();
 
-					const langRegExp = new RegExp(speechLang);
-					const filteredVoices = voices
-						.filter((voice) => langRegExp.test(voice.lang))
-						.sort((a, b) => a.name.localeCompare(b.name));
-
-					resolve(filteredVoices);
-				}
-
-				reject(new Error(`Load synth voices failed`));
-			}, 10);
-		});
+		MessageToast.show(this.getText("refreshSuccessMessage"));
 	}
 
-	/**
-	 * Get Dictionary JSON Model
-	 * @returns {IDictionaryStore}
-	 */
-	getDictionaryStore(): IDictionaryStore {
-		const model = this.getView().getModel(this.storeName) as CustomModel;
+	private getText(textId: string): string {
+		const resourceModel = this.getOwnerComponent().getModel(
+			"i18n"
+		) as ResourceModel;
+		const resourceBundle = resourceModel.getResourceBundle() as ResourceBundle;
 
-		return model.getData<IDictionaryStore>();
-	}
-
-	/**
-	 * Run speach
-	 * @param {string} phrase Phrase for speech
-	 */
-	runSpeech(phrase: string): void {
-		const synth: SpeechSynthesis = window.speechSynthesis;
-
-		synth.cancel();
-
-		const { voices, selectedVoice, speed, pitch } = this.getDictionaryStore();
-		const voice = voices.find((voice) => voice.name === selectedVoice);
-
-		const utterThis = new SpeechSynthesisUtterance(phrase);
-		utterThis.voice = voice;
-		utterThis.rate = speed;
-		utterThis.pitch = pitch;
-
-		synth.speak(utterThis);
-	}
-
-	/**
-	 * Say all phrase
-	 * @param {Button$ClickEvent} event Button click event object
-	 */
-	async onSayAllPhrase(event: Button$ClickEvent): Promise<void> {
-		const id = event.getSource().getCustomData()[0].getValue() as string;
-
-		const context = this.getModel("dictionary").bindContext(
-			`/Dictionary/${id}`
-		) as CustomContextBinding;
-
-		const { base, past, participle } =
-			await context.requestObject<DictionaryRow>();
-
-		const phrase = `${base}, ${past}, ${participle}`;
-
-		this.runSpeech(phrase);
-	}
-
-	/**
-	 * Say word
-	 * @param {Button$ClickEvent} event Button click event object
-	 */
-	onSayWord(event: Button$ClickEvent): void {
-		const phrase = event.getSource().getCustomData()[0].getValue() as string;
-
-		this.runSpeech(phrase);
+		return resourceBundle.getText(textId);
 	}
 }
