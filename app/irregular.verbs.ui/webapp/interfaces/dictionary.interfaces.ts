@@ -1,4 +1,4 @@
-export interface IDictionaryStore {
+export interface IDictionaryModel {
 	busy: boolean;
 	editable: boolean;
 	hasUIChanges: boolean;

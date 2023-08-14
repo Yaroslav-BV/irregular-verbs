@@ -6,6 +6,7 @@ import ResourceModel from "sap/ui/model/resource/ResourceModel";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import ListBinding from "sap/ui/model/ListBinding";
 import ODataListBinding from "sap/ui/model/odata/v4/ODataListBinding";
+import Context from "sap/ui/model/odata/v4/Context";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import FilterType from "sap/ui/model/FilterType";
@@ -13,13 +14,15 @@ import MessageBox from "sap/m/MessageBox";
 import MessageToast from "sap/m/MessageToast";
 import Message from "sap/ui/core/message/Message";
 import SearchField from "sap/m/SearchField";
-import { IDictionaryStore } from "../interfaces/dictionary.interfaces";
+import Table from "sap/m/Table";
+import { IDictionaryModel } from "../interfaces/dictionary.interfaces";
 import {
 	DICTIONARY_MODEL_NAME,
+	SPEECH_MODEL_NAME,
 	EMPTY_VERBS_DATA,
 } from "../constants/dictionary.constant";
-import Table from "sap/m/Table";
-import Context from "sap/ui/model/odata/v4/Context";
+import { ISpeechModel, SpeechLang } from "../interfaces/speech.interface";
+import { Button$PressEvent } from "sap/m/Button";
 
 /**
  * @namespace irregular.verbs.ui.controller
@@ -27,9 +30,10 @@ import Context from "sap/ui/model/odata/v4/Context";
 export default class Dictionary extends BaseController {
 	private technicalErrors = false;
 
-	onInit(): void {
+	async onInit(): Promise<void> {
 		this.initDictionaryModel();
 		this.initMessagesModel();
+		await this.initSpeechModel();
 	}
 
 	/**
@@ -54,7 +58,7 @@ export default class Dictionary extends BaseController {
 	 * Initialization dictionary model
 	 */
 	private initDictionaryModel(): void {
-		const initDictionary: IDictionaryStore = {
+		const initDictionary: IDictionaryModel = {
 			busy: false,
 			editable: false,
 			hasUIChanges: false,
@@ -62,6 +66,22 @@ export default class Dictionary extends BaseController {
 		};
 
 		this.setModel(new JSONModel(initDictionary), DICTIONARY_MODEL_NAME);
+	}
+
+	/**
+	 * Initialization speech model
+	 */
+	async initSpeechModel(): Promise<void> {
+		const voices = await this.loadSpeechVoices(SpeechLang.EN);
+
+		const initSpeechModel: ISpeechModel = {
+			voices,
+			selectedVoice: voices[0].name,
+			speed: 1,
+			pitch: 1,
+		};
+
+		this.setModel(new JSONModel(initSpeechModel), SPEECH_MODEL_NAME);
 	}
 
 	onEdit(): void {
@@ -156,6 +176,16 @@ export default class Dictionary extends BaseController {
 		MessageToast.show(this.getText("refreshSuccessMessage"));
 	}
 
+	/**
+	 * Handle speech one verb
+	 * @param {Button$ClickEvent} event Button click event object
+	 */
+	onSpeech(event: Button$PressEvent): void {
+		const verb = event.getSource().getCustomData()[0].getValue() as string;
+
+		this.runSpeech(verb);
+	}
+
 	onMessageBindingChange(event: Event): void {
 		const contexts = event.getSource<ListBinding>().getContexts();
 		let isMessageOpen = false;
@@ -212,5 +242,66 @@ export default class Dictionary extends BaseController {
 
 	private getDictionaryBinding(): ODataListBinding {
 		return this.byId("dictionaryList").getBinding("items") as ODataListBinding;
+	}
+
+	/**
+	 * Load native voices
+	 * @param {SpeechLang} speechLang Language
+	 * @returns {Promise<SpeechSynthesisVoice[]>}
+	 */
+	private async loadSpeechVoices(
+		speechLang: SpeechLang
+	): Promise<SpeechSynthesisVoice[]> {
+		return new Promise((resolve, reject) => {
+			const synth: SpeechSynthesis = window.speechSynthesis;
+
+			const intervalId = setInterval(() => {
+				const voices = synth.getVoices();
+
+				if (voices.length) {
+					clearInterval(intervalId);
+
+					const langRegExp = new RegExp(speechLang);
+					const filteredVoices = voices
+						.filter((voice) => langRegExp.test(voice.lang))
+						.sort((a, b) => a.name.localeCompare(b.name));
+
+					return resolve(filteredVoices);
+				}
+
+				MessageToast.show(this.getText("loadVoicesFailedMessage"));
+				return reject(new Error(this.getText("loadVoicesFailedMessage")));
+			}, 10);
+		});
+	}
+
+	/**
+	 * Get Speech JSON Model
+	 * @returns {ISpeechModel}
+	 */
+	getDictionaryStore(): ISpeechModel {
+		const speechModel = this.getModel<JSONModel>(SPEECH_MODEL_NAME);
+
+		return speechModel.getData() as ISpeechModel;
+	}
+
+	/**
+	 * Run speach
+	 * @param {string} phrase Phrase for speech
+	 */
+	private runSpeech(phrase: string): void {
+		const synth: SpeechSynthesis = window.speechSynthesis;
+
+		synth.cancel();
+
+		const { voices, selectedVoice, speed, pitch } = this.getDictionaryStore();
+		const voice = voices.find((voice) => voice.name === selectedVoice);
+
+		const utterThis = new SpeechSynthesisUtterance(phrase);
+		utterThis.voice = voice;
+		utterThis.rate = speed;
+		utterThis.pitch = pitch;
+
+		synth.speak(utterThis);
 	}
 }

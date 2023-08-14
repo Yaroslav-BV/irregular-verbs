@@ -4,23 +4,73 @@
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
+    xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
     core:require="{
 		formatter: 'irregular/verbs/ui/model/formatter'
 	}"
 >
     <Shell>
         <App
-            busy="{dictionaryStore>/busy}"
+            busy="{dictionaryModel>/busy}"
             class="sapUiSizeCompact"
         >
             <pages>
-                <Page title="{i18n>appTitle}">
+                <Page
+                    title="{i18n>appTitle}"
+                    titleAlignment="Center"
+                >
                     <content>
+                        <Toolbar>
+                            <Label
+                                text="Languages"
+                                labelFor="select-voice"
+                            />
+                            <Select
+                                id="select-voice"
+                                selectedKey="{speechModel>/selectedVoice}"
+                                items="{
+						            path: 'speechModel>/voices'
+					            }"
+                            >
+                                <core:Item
+                                    key="{speechModel>name}"
+                                    text="{speechModel>name}"
+                                />
+                            </Select>
+                            <Label
+                                text="Speed"
+                                labelFor="slider-speed"
+                            />
+                            <Slider
+                                id="slider-speed"
+                                width="20%"
+                                min="0.1"
+                                max="1.5"
+                                step="0.1"
+                                value="{speechModel>/speed}"
+                                showAdvancedTooltip="true"
+                            />
+                            <Text text="{speechModel>/speed}" />
+                            <Label
+                                text="Pitch"
+                                labelFor="slider-pitch"
+                            />
+                            <Slider
+                                id="slider-pitch"
+                                width="20%"
+                                min="0.1"
+                                max="2"
+                                step="0.1"
+                                value="{speechModel>/pitch}"
+                                showAdvancedTooltip="true"
+                            />
+                            <Text text="{speechModel>/pitch}" />
+                        </Toolbar>
                         <Table
                             id="dictionaryList"
                             growing="true"
                             growingThreshold="20"
-                            mode="{= ${dictionaryStore>/editable} ? 'SingleSelectLeft' : 'None'}"
+                            mode="{= ${dictionaryModel>/editable} ? 'SingleSelectLeft' : 'None'}"
                             items="{
 								path: 'dictionary>/Dictionary',
 								parameters: {
@@ -30,14 +80,14 @@
 							}"
                         >
                             <headerToolbar>
-                                <OverflowToolbar>
+                                <Toolbar>
                                     <content>
                                         <SearchField
                                             id="searchField"
                                             width="20%"
                                             placeholder="{i18n>searchFieldPlaceholder}"
                                             search=".onSearch"
-                                            enabled="{= !${dictionaryStore>/hasUIChanges}}"
+                                            enabled="{= !${dictionaryModel>/hasUIChanges}}"
                                         />
                                         <Button
                                             id="refreshButton"
@@ -51,24 +101,24 @@
                                             icon="sap-icon://edit"
                                             tooltip="{i18n>editTooltip}"
                                             press=".onEdit"
-                                            visible="{= !${dictionaryStore>/editable}}"
+                                            visible="{= !${dictionaryModel>/editable}}"
                                         />
                                         <Button
                                             id="addUserButton"
                                             icon="sap-icon://add"
                                             tooltip="{i18n>createTooltip}"
                                             press=".onCreate"
-                                            visible="{= ${dictionaryStore>/editable}}"
+                                            visible="{= ${dictionaryModel>/editable}}"
                                         />
                                         <Button
                                             id="deleteButton"
                                             icon="sap-icon://delete"
                                             tooltip="{i18n>deleteTooltip}"
                                             press=".onDelete"
-                                            visible="{= ${dictionaryStore>/editable}}"
+                                            visible="{= ${dictionaryModel>/editable}}"
                                         />
                                     </content>
-                                </OverflowToolbar>
+                                </Toolbar>
                             </headerToolbar>
                             <columns>
                                 <Column>
@@ -83,56 +133,99 @@
                                 <Column>
                                     <Text text="Translation" />
                                 </Column>
+                                <Column>
+                                    <Text text="Play all" />
+                                </Column>
                             </columns>
                             <items>
                                 <ColumnListItem>
                                     <HBox alignItems="Center">
-                                        <Text
-                                            text="{dictionary>base}"
-                                            visible="{= !${dictionaryStore>/editable}}"
-                                        />
+                                        <HBox
+                                            alignItems="Center"
+                                            visible="{= !${dictionaryModel>/editable}}"
+                                        >
+                                            <Button
+                                                icon="sap-icon://sound-loud"
+                                                type="Transparent"
+                                                press="onSpeech"
+                                                tooltip="Say word"
+                                                app:verb="{dictionary>base}"
+                                                class="sapUiTinyMarginEnd"
+                                            />
+                                            <Text text="{dictionary>base}" />
+                                        </HBox>
                                         <Input
                                             value="{dictionary>base}"
-                                            visible="{= ${dictionaryStore>/editable}}"
+                                            visible="{= ${dictionaryModel>/editable}}"
                                         />
                                     </HBox>
                                     <HBox alignItems="Center">
-                                        <Text
-                                            text="{dictionary>past}"
-                                            visible="{= !${dictionaryStore>/editable}}"
-                                        />
+                                        <HBox
+                                            alignItems="Center"
+                                            visible="{= !${dictionaryModel>/editable}}"
+                                        >
+                                            <Button
+                                                icon="sap-icon://sound-loud"
+                                                type="Transparent"
+                                                press="onSpeech"
+                                                tooltip="Say word"
+                                                app:verb="{dictionary>past}"
+                                                class="sapUiTinyMarginEnd"
+                                            />
+                                            <Text text="{dictionary>past}" />
+                                        </HBox>
                                         <Input
                                             value="{dictionary>past}"
-                                            visible="{= ${dictionaryStore>/editable}}"
+                                            visible="{= ${dictionaryModel>/editable}}"
                                         />
                                     </HBox>
                                     <HBox alignItems="Center">
-                                        <Text
-                                            text="{dictionary>participle}"
-                                            visible="{= !${dictionaryStore>/editable}}"
-                                        />
+                                        <HBox
+                                            alignItems="Center"
+                                            visible="{= !${dictionaryModel>/editable}}"
+                                        >
+                                            <Button
+                                                icon="sap-icon://sound-loud"
+                                                type="Transparent"
+                                                press="onSpeech"
+                                                tooltip="Say word"
+                                                app:verb="{dictionary>participle}"
+                                                class="sapUiTinyMarginEnd"
+                                            />
+                                            <Text
+                                                text="{dictionary>participle}"
+                                            />
+                                        </HBox>
                                         <Input
                                             value="{dictionary>participle}"
-                                            visible="{= ${dictionaryStore>/editable}}"
+                                            visible="{= ${dictionaryModel>/editable}}"
                                         />
                                     </HBox>
 
                                     <HBox alignItems="Center">
                                         <Text
                                             text="{dictionary>translation}"
-                                            visible="{= !${dictionaryStore>/editable}}"
+                                            visible="{= !${dictionaryModel>/editable}}"
                                         />
                                         <Input
                                             value="{dictionary>translation}"
-                                            visible="{= ${dictionaryStore>/editable}}"
+                                            visible="{= ${dictionaryModel>/editable}}"
                                         />
                                     </HBox>
+                                    <Button
+                                        icon="sap-icon://sound-loud"
+                                        type="Transparent"
+                                        press="onSpeech"
+                                        tooltip="Say all"
+                                        app:verb="{= ${dictionary>base} + ', ' + ${dictionary>past} + ', ' + ${dictionary>participle}}"
+                                        class="sapUiTinyMarginEnd"
+                                    />
                                 </ColumnListItem>
                             </items>
                         </Table>
                     </content>
                     <footer>
-                        <Toolbar visible="{dictionaryStore>/editable}">
+                        <Toolbar visible="{dictionaryModel>/editable}">
                             <ToolbarSpacer />
                             <Button
                                 id="saveButton"
