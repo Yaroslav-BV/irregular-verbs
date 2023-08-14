@@ -18,6 +18,8 @@ import {
 	DICTIONARY_MODEL_NAME,
 	EMPTY_VERBS_DATA,
 } from "../constants/dictionary.constant";
+import Table from "sap/m/Table";
+import Context from "sap/ui/model/odata/v4/Context";
 
 /**
  * @namespace irregular.verbs.ui.controller
@@ -94,6 +96,27 @@ export default class Dictionary extends BaseController {
 		this.technicalErrors = false;
 
 		this.setPropDictionaryModel<boolean>("editable", false);
+	}
+
+	onDelete(): void {
+		const selected = (this.byId("dictionaryList") as Table).getSelectedItem();
+
+		if (selected) {
+			const context = selected.getBindingContext("dictionary") as Context;
+			const verbId = context.getProperty("ID") as string;
+
+			context.delete().then(
+				() => {
+					MessageToast.show(this.getText("deletionSuccessMessage"));
+				},
+				(error: Error) => {
+					this.setUIChanges();
+					MessageBox.error(error.message + ": " + verbId);
+				}
+			);
+
+			this.setUIChanges(true);
+		}
 	}
 
 	async onCancel(): Promise<void> {
