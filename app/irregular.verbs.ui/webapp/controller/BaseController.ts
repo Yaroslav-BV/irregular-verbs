@@ -41,8 +41,8 @@ export default abstract class BaseController extends Controller {
 	 * @param [sName] The model name
 	 * @returns The model instance
 	 */
-	public getModel(sName?: string): Model {
-		return this.getView().getModel(sName);
+	public getModel<T extends Model>(sName?: string): T {
+		return this.getView().getModel(sName) as T;
 	}
 
 	/**

@@ -14,7 +14,10 @@ import MessageToast from "sap/m/MessageToast";
 import Message from "sap/ui/core/message/Message";
 import SearchField from "sap/m/SearchField";
 import { IDictionaryStore } from "../interfaces/dictionary.interfaces";
-import { DICTIONARY_STORE_NAME } from "../constants/dictionary.constant";
+import {
+	DICTIONARY_MODEL_NAME,
+	EMPTY_VERBS_DATA,
+} from "../constants/dictionary.constant";
 
 /**
  * @namespace irregular.verbs.ui.controller
@@ -23,11 +26,14 @@ export default class Dictionary extends BaseController {
 	private technicalErrors = false;
 
 	onInit(): void {
-		this.initDictionaryStore();
-		this.initMessages();
+		this.initDictionaryModel();
+		this.initMessagesModel();
 	}
 
-	initMessages(): void {
+	/**
+	 * Initialization message model
+	 */
+	initMessagesModel(): void {
 		const messageManager = sap.ui.getCore().getMessageManager();
 		const messageModel = messageManager.getMessageModel();
 		const messageModelBinding = messageModel.bindList(
@@ -40,6 +46,91 @@ export default class Dictionary extends BaseController {
 		this.setModel(messageModel, "message");
 
 		messageModelBinding.attachChange(this.onMessageBindingChange, this);
+	}
+
+	/**
+	 * Initialization dictionary model
+	 */
+	private initDictionaryModel(): void {
+		const initDictionary: IDictionaryStore = {
+			busy: false,
+			editable: false,
+			hasUIChanges: false,
+			verbsEmpty: true,
+		};
+
+		this.setModel(new JSONModel(initDictionary), DICTIONARY_MODEL_NAME);
+	}
+
+	onEdit(): void {
+		this.setPropDictionaryModel<boolean>("editable", true);
+	}
+
+	onCreate(): void {
+		const binding = this.getDictionaryBinding();
+		binding.create(EMPTY_VERBS_DATA);
+
+		this.setUIChanges();
+		this.setPropDictionaryModel<boolean>("verbsEmpty", true);
+	}
+
+	onSave(): void {
+		const fnSuccess = () => {
+			this.setBusy(false);
+			MessageToast.show(this.getText("changesSentMessage"));
+			this.setUIChanges(false);
+		};
+
+		const fnError = (error: Error) => {
+			this.setBusy(false);
+			this.setUIChanges(false);
+			MessageBox.error(error.message);
+		};
+
+		this.setBusy(true);
+		this.getModel<ODataModel>("dictionary")
+			.submitBatch("dictionaryGroup")
+			.then(fnSuccess, fnError);
+		this.technicalErrors = false;
+
+		this.setPropDictionaryModel<boolean>("editable", false);
+	}
+
+	async onCancel(): Promise<void> {
+		const binding = this.getDictionaryBinding();
+		await binding.resetChanges();
+
+		this.technicalErrors = false;
+		this.setUIChanges();
+		this.setPropDictionaryModel<boolean>("editable", false);
+	}
+
+	onSearch(): void {
+		const searchField = this.byId("searchField") as SearchField;
+		const searchValue = searchField.getValue();
+
+		const filters = new Filter([
+			new Filter("base", FilterOperator.Contains, searchValue),
+			new Filter("past", FilterOperator.Contains, searchValue),
+			new Filter("participle", FilterOperator.Contains, searchValue),
+			new Filter("translation", FilterOperator.Contains, searchValue),
+		]);
+
+		const binding = this.getDictionaryBinding();
+		binding.filter(filters, FilterType.Application);
+	}
+
+	onRefresh(): void {
+		const binding = this.getDictionaryBinding();
+
+		if (binding.hasPendingChanges()) {
+			MessageBox.error(this.getText("refreshNotPossibleMessage"));
+			return;
+		}
+
+		binding.refresh();
+
+		MessageToast.show(this.getText("refreshSuccessMessage"));
 	}
 
 	onMessageBindingChange(event: Event): void {
@@ -65,7 +156,20 @@ export default class Dictionary extends BaseController {
 		isMessageOpen = true;
 	}
 
-	private setUIChanges(hasUIChanges: boolean): void {
+	private getText(textId: string): string {
+		const resourceModel = this.getOwnerComponent().getModel(
+			"i18n"
+		) as ResourceModel;
+		const resourceBundle = resourceModel.getResourceBundle() as ResourceBundle;
+
+		return resourceBundle.getText(textId);
+	}
+
+	private setBusy(isBusy: boolean): void {
+		this.setPropDictionaryModel<boolean>("busy", isBusy);
+	}
+
+	private setUIChanges(hasUIChanges?: boolean): void {
 		if (this.technicalErrors) {
 			hasUIChanges = true;
 		} else if (hasUIChanges === undefined) {
@@ -74,78 +178,16 @@ export default class Dictionary extends BaseController {
 			).hasPendingChanges();
 		}
 
-		const model = this.getView().getModel(DICTIONARY_STORE_NAME) as JSONModel;
-		model.setProperty("/hasUIChanges", hasUIChanges);
+		this.setPropDictionaryModel<boolean>("hasUIChanges", hasUIChanges);
 	}
 
-	/**
-	 * Initialization dictionary store
-	 */
-	private initDictionaryStore(): void {
-		const initDictionaryStore: IDictionaryStore = {
-			busy: false,
-			editable: false,
-			hasUIChanges: false,
-		};
+	private setPropDictionaryModel<T>(propName: string, value: T): void {
+		const model = this.getModel<JSONModel>(DICTIONARY_MODEL_NAME);
 
-		const dictionaryStore = new JSONModel(initDictionaryStore);
-
-		this.setModel(dictionaryStore, DICTIONARY_STORE_NAME);
+		model.setProperty(`/${propName}`, value);
 	}
 
-	onEdit(): void {
-		(this.getModel(DICTIONARY_STORE_NAME) as JSONModel).setProperty(
-			"/editable",
-			true
-		);
-	}
-
-	onCancel(): void {
-		(this.getModel(DICTIONARY_STORE_NAME) as JSONModel).setProperty(
-			"/editable",
-			false
-		);
-	}
-
-	onSearch(): void {
-		const searchField = this.byId("searchField") as SearchField;
-		const searchValue = searchField.getValue();
-
-		const filters = new Filter([
-			new Filter("base", FilterOperator.Contains, searchValue),
-			new Filter("past", FilterOperator.Contains, searchValue),
-			new Filter("participle", FilterOperator.Contains, searchValue),
-			new Filter("translation", FilterOperator.Contains, searchValue),
-		]);
-
-		const tableBinding = this.byId("dictionaryList").getBinding(
-			"items"
-		) as ODataListBinding;
-
-		tableBinding.filter(filters, FilterType.Application);
-	}
-
-	onRefresh(): void {
-		const binding = this.byId("dictionaryList").getBinding(
-			"items"
-		) as ODataListBinding;
-
-		if (binding.hasPendingChanges()) {
-			MessageBox.error(this.getText("refreshNotPossibleMessage"));
-			return;
-		}
-
-		binding.refresh();
-
-		MessageToast.show(this.getText("refreshSuccessMessage"));
-	}
-
-	private getText(textId: string): string {
-		const resourceModel = this.getOwnerComponent().getModel(
-			"i18n"
-		) as ResourceModel;
-		const resourceBundle = resourceModel.getResourceBundle() as ResourceBundle;
-
-		return resourceBundle.getText(textId);
+	private getDictionaryBinding(): ODataListBinding {
+		return this.byId("dictionaryList").getBinding("items") as ODataListBinding;
 	}
 }

@@ -23,20 +23,28 @@
                             items="{
 								path: 'dictionary>/Dictionary',
 								parameters: {
-									$count: true
+									$count: true,
+									$$updateGroupId : 'dictionaryGroup'
 								}
 							}"
                         >
                             <headerToolbar>
                                 <OverflowToolbar>
                                     <content>
-                                        <ToolbarSpacer />
                                         <SearchField
                                             id="searchField"
                                             width="20%"
                                             placeholder="{i18n>searchFieldPlaceholder}"
                                             search=".onSearch"
+                                            enabled="{= !${dictionaryStore>/hasUIChanges}}"
                                         />
+                                        <Button
+                                            id="refreshButton"
+                                            icon="sap-icon://refresh"
+                                            tooltip="{i18n>refreshTooltip}"
+                                            press=".onRefresh"
+                                        />
+                                        <ToolbarSpacer />
                                         <Button
                                             id="editButton"
                                             icon="sap-icon://edit"
@@ -45,17 +53,11 @@
                                             visible="{= !${dictionaryStore>/editable}}"
                                         />
                                         <Button
-                                            id="cancelButton"
-                                            icon="sap-icon://sys-cancel"
-                                            tooltip="{i18n>cancelTooltip}"
-                                            press=".onCancel"
+                                            id="addUserButton"
+                                            icon="sap-icon://add"
+                                            tooltip="{i18n>createTooltip}"
+                                            press=".onCreate"
                                             visible="{= ${dictionaryStore>/editable}}"
-                                        />
-                                        <Button
-                                            id="refreshButton"
-                                            icon="sap-icon://refresh"
-                                            tooltip="{i18n>refreshTooltip}"
-                                            press=".onRefresh"
                                         />
                                     </content>
                                 </OverflowToolbar>
@@ -121,6 +123,23 @@
                             </items>
                         </Table>
                     </content>
+                    <footer>
+                        <Toolbar visible="{dictionaryStore>/editable}">
+                            <ToolbarSpacer />
+                            <Button
+                                id="saveButton"
+                                type="Emphasized"
+                                text="{i18n>saveButtonText}"
+                                enabled="{= ${message>/}.length === 0 &amp;&amp; ${appView>/usernameEmpty} === false }"
+                                press=".onSave"
+                            />
+                            <Button
+                                id="cancelButton"
+                                text="{i18n>cancelButtonText}"
+                                press=".onCancel"
+                            />
+                        </Toolbar>
+                    </footer>
                 </Page>
             </pages>
         </App>
