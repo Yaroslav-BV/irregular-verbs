@@ -19,15 +19,24 @@
                         <Table
                             id="dictionaryList"
                             growing="true"
-                            growingThreshold="10"
+                            growingThreshold="20"
                             items="{
-								path: 'dictionary>/Dictionary'
+								path: 'dictionary>/Dictionary',
+								parameters: {
+									$count: true
+								}
 							}"
                         >
                             <headerToolbar>
                                 <OverflowToolbar>
                                     <content>
                                         <ToolbarSpacer />
+                                        <SearchField
+                                            id="searchField"
+                                            width="20%"
+                                            placeholder="{i18n>searchFieldPlaceholder}"
+                                            search=".onSearch"
+                                        />
                                         <Button
                                             id="editButton"
                                             icon="sap-icon://edit"
